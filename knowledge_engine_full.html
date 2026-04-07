@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knowledge Engine - Full Featured</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #f8f9fa;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: #fff;
+            border-bottom: 1px solid #dadce0;
+            padding: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .search-container {
+            max-width: 584px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .search-box {
+            width: 100%;
+            height: 46px;
+            border: 1px solid #dfe1e5;
+            border-radius: 24px;
+            padding: 0 50px 0 20px;
+            font-size: 16px;
+            outline: none;
+            transition: box-shadow 0.2s;
+        }
+
+        .search-box:focus {
+            box-shadow: 0 1px 6px rgba(32, 33, 36, 0.28);
+        }
+
+        .search-btn {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 20px auto;
+            padding: 0 20px;
+            display: flex;
+            gap: 30px;
+        }
+
+        /* Left Panel - All 6 Features */
+        .left-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-height: none;
+            overflow: visible;
+        }
+
+        .panel-section {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 1px 6px rgba(32, 33, 36, 0.1);
+            overflow: hidden;
+        }
+
+        .panel-header {
+            background: #f8f9fa;
+            padding: 12px 16px;
+            font-weight: 500;
+            color: #202124;
+            border-bottom: 1px solid #e8eaed;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .panel-content {
+            padding: 16px;
+        }
+
+        /* 1. Full Article */
+        .full-article {
+            max-height: none;
+            overflow: visible;
+            line-height: 1.6;
+            color: #3c4043;
+            font-size: 14px;
+        }
+
+        .full-article h2, .full-article h3 {
+            color: #202124;
+            margin: 16px 0 8px;
+            font-size: 16px;
+        }
+
+        .full-article p {
+            margin-bottom: 12px;
+        }
+
+        /* 2. Search History */
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .history-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .history-item:hover {
+            background: #f1f3f4;
+        }
+
+        .history-icon {
+            width: 16px;
+            height: 16px;
+            color: #9aa0a6;
+        }
+
+        .history-text {
+            flex: 1;
+            font-size: 14px;
+            color: #3c4043;
+        }
+
+        .history-time {
+            font-size: 12px;
+            color: #9aa0a6;
+        }
+
+        /* 3. Disambiguation */
+        .disambig-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .disambig-item {
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border: 1px solid #e8eaed;
+        }
+
+        .disambig-item:hover {
+            background: #f8f9fa;
+            border-color: #dadce0;
+        }
+
+        .disambig-thumb {
+            width: 60px;
+            height: 60px;
+            border-radius: 4px;
+            object-fit: cover;
+            background: #e8eaed;
+        }
+
+        .disambig-info {
+            flex: 1;
+        }
+
+        .disambig-title {
+            font-weight: 500;
+            color: #1967d2;
+            font-size: 13px;
+            margin-bottom: 2px;
+        }
+
+        .disambig-desc {
+            font-size: 12px;
+            color: #5f6368;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* 5. Map */
+        .map-container {
+            width: 100%;
+            height: 250px;
+            background: #e8eaed;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .map-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .map-placeholder {
+            text-align: center;
+            color: #9aa0a6;
+        }
+
+        .map-placeholder svg {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 8px;
+        }
+
+        /* Knowledge Card (Right Side) */
+        .knowledge-card {
+            width: 440px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 1px 6px rgba(32, 33, 36, 0.1);
+            overflow: hidden;
+            position: sticky;
+            top: 100px;
+            height: fit-content;
+        }
+
+        .card-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: #e8eaed;
+        }
+
+        .card-content {
+            padding: 16px 12px;
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 500;
+            color: #202124;
+            margin-bottom: 4px;
+        }
+
+        .card-subtitle {
+            font-size: 14px;
+            color: #5f6368;
+            margin-bottom: 16px;
+        }
+
+        .card-description {
+            font-size: 14px;
+            color: #3c4043;
+            line-height: 1.58;
+            margin-bottom: 16px;
+        }
+
+        .card-link {
+            color: #1967d2;
+            text-decoration: none;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 16px;
+        }
+
+        .facts-section {
+            border-top: 1px solid #ebebeb;
+            padding-top: 16px;
+            margin-bottom: 16px;
+        }
+
+        .fact-row {
+            display: flex;
+            margin-bottom: 12px;
+        }
+
+        .fact-label {
+            width: 120px;
+            font-size: 14px;
+            color: #70757a;
+        }
+
+        .fact-value {
+            font-size: 14px;
+            color: #202124;
+            flex: 1;
+            min-width: 0;
+            overflow-wrap: anywhere;
+        }
+
+        .related-section {
+            border-top: 1px solid #ebebeb;
+            padding-top: 16px;
+        }
+
+        .related-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #202124;
+            margin-bottom: 12px;
+        }
+
+        .related-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .related-item {
+            text-align: center;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .related-item:hover {
+            background: #f1f3f4;
+        }
+
+        .related-image {
+            width: 100%;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 4px;
+            background: #e8eaed;
+            margin-bottom: 6px;
+        }
+
+        .related-name {
+            font-size: 12px;
+            color: #3c4043;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Loading & Empty States */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            color: #5f6368;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e8eaed;
+            border-top-color: #4285f4;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+            color: #9aa0a6;
+            padding: 40px;
+        }
+
+        .error-message {
+            background: #fce8e8;
+            border: 1px solid #f5c2c2;
+            color: #c53030;
+            padding: 16px;
+            border-radius: 8px;
+            margin: 20px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Responsive */
+        @media (max-width: 1100px) {
+            .main-container {
+                flex-direction: column;
+            }
+
+            .knowledge-card {
+                width: 100%;
+                position: static;
+            }
+
+            .left-panel {
+                max-height: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="search-container">
+            <input 
+                type="text" 
+                class="search-box" 
+                id="searchInput" 
+                placeholder="Search Wikipedia for people, places, topics..."
+                autocomplete="off"
+            >
+            <button class="search-btn" onclick="performSearch()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="#4285f4">
+                    <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- LEFT PANEL: All 6 Features -->
+        <div class="left-panel" id="leftPanel" style="display: none;">
+            
+            <!-- 1. Full Article -->
+            <div class="panel-section">
+                <div class="panel-header">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+                    </svg>
+                    Full Article
+                </div>
+                <div class="panel-content">
+                    <div class="full-article" id="fullArticle"></div>
+                </div>
+            </div>
+
+            <!-- 2. Multiple Results / Disambiguation -->
+            <div class="panel-section" id="disambigSection">
+                <div class="panel-header">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                    </svg>
+                    Did you mean?
+                </div>
+                <div class="panel-content">
+                    <div class="disambig-list" id="disambigList"></div>
+                </div>
+            </div>
+
+            <!-- 3. Location -->
+            <div class="panel-section" id="mapSection">
+                <div class="panel-header">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20.5 3l-6 1.5-6-1.5-5.5 1.4v14.1l5.5-1.4 6 1.5 6-1.5 5.5 1.4V4.4l-5.5-1.4zM12 17l-6-1.5V6.5l6 1.5v9zm6-1.5l-6 1.5V8l6-1.5v9z"/>
+                    </svg>
+                    Location
+                </div>
+                <div class="panel-content">
+                    <div class="map-container" id="mapContainer">
+                        <div class="map-placeholder">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                            </svg>
+                            <div>No location data available</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div class="loading" id="loadingState" style="flex: 1;">
+            <div class="spinner"></div>
+            <p>Searching Wikipedia...</p>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState" style="flex: 1;">
+            <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="#dadce0" stroke-width="1">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="M21 21l-4.35-4.35"/>
+                <path d="M11 8v6M8 11h6"/>
+            </svg>
+            <p style="margin-top: 20px; color: #5f6368;">Search for any topic to see the full knowledge engine</p>
+            <p style="margin-top: 10px; font-size: 14px; color: #9aa0a6;">Try: Vancouver, Albert Einstein, Taj Mahal, Python</p>
+        </div>
+
+        <!-- RIGHT: Knowledge Card -->
+        <aside class="knowledge-card" id="knowledgeCard" style="display: none;">
+            <img class="card-image" id="cardImage" src="" alt="">
+            <div class="card-content">
+                <h2 class="card-title" id="cardTitle"></h2>
+                <p class="card-subtitle" id="cardSubtitle"></p>
+                <p class="card-description" id="cardDescription"></p>
+                <a class="card-link" id="cardLink" href="#" target="_blank">
+                    Wikipedia →
+                </a>
+                
+                <div class="facts-section" id="factsSection"></div>
+                
+                <div class="related-section" id="relatedSection">
+                    <h3 class="related-title">Related topics</h3>
+                    <div class="related-grid" id="relatedGrid"></div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <script>
+        // State
+        const searchInput = document.getElementById('searchInput');
+        
+        // Initialize
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+
+        async function performSearch(specificQuery = null) {
+            const query = specificQuery || searchInput.value.trim();
+            if (!query) return;
+
+            // Update input if searching from history
+            if (specificQuery) {
+                searchInput.value = specificQuery;
+            }
+
+            // UI State
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('knowledgeCard').style.display = 'none';
+            document.getElementById('leftPanel').style.display = 'none';
+            document.getElementById('loadingState').classList.add('active');
+
+            try {
+                // Get all search results for disambiguation
+                const searchResults = await fetchWikipediaSearch(query, 10);
+                
+                if (!searchResults || searchResults.length === 0) {
+                    showError(`No results found for "${query}"`);
+                    return;
+                }
+
+                const topResult = searchResults[0];
+                const title = topResult.title;
+
+                // Parallel fetch everything
+                const [articleData, fullArticle, facts, related] = await Promise.all([
+                    fetchWikipediaArticle(title),
+                    fetchFullArticle(title),
+                    fetchWikidataFacts(title),
+                    fetchRelatedTopics(title)
+                ]);
+
+                // Render everything
+                renderDisambiguation(searchResults, title);
+                renderFullArticle(fullArticle);
+                renderMap(facts);
+                displayKnowledgeCard({
+                    title: title,
+                    subtitle: articleData.description || 'Wikipedia Article',
+                    image: articleData.image,
+                    description: articleData.extract,
+                    wikipedia: `https://en.wikipedia.org/wiki/${encodeURIComponent(title.replace(/ /g, '_'))}`,
+                    facts: facts.slice(0, 5),
+                    related: related
+                });
+
+                // Show everything
+                document.getElementById('loadingState').classList.remove('active');
+                document.getElementById('leftPanel').style.display = 'flex';
+                document.getElementById('knowledgeCard').style.display = 'block';
+
+            } catch (error) {
+                console.error('Search error:', error);
+                showError(`Error: ${error.message}`);
+            }
+        }
+
+        // API Functions
+        async function fetchWikipediaSearch(query, limit = 1) {
+            const url = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&srlimit=${limit}&format=json&origin=*`;
+            const response = await fetch(url);
+            const data = await response.json();
+            return data.query.search;
+        }
+
+        async function fetchWikipediaArticle(title) {
+            const url = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(title)}&prop=extracts|pageimages|description&exintro&explaintext&piprop=thumbnail&pithumbsize=400&format=json&origin=*`;
+            const response = await fetch(url);
+            const data = await response.json();
+            
+            const pages = data.query.pages;
+            const page = pages[Object.keys(pages)[0]];
+
+            return {
+                extract: page.extract || 'No description available.',
+                description: page.description || '',
+                image: page.thumbnail ? page.thumbnail.source : null
+            };
+        }
+
+        async function fetchFullArticle(title) {
+            // Get full article with sections
+            const url = `https://en.wikipedia.org/w/api.php?action=parse&page=${encodeURIComponent(title)}&prop=text&format=json&origin=*`;
+            const response = await fetch(url);
+            const data = await response.json();
+            
+            if (data.parse && data.parse.text) {
+                // Clean up the HTML
+                let html = data.parse.text['*'];
+                // Remove edit links and other unwanted elements
+                html = html.replace(/<span class="editsection".*?<\/span>/g, '');
+                html = html.replace(/<sup class="reference".*?<\/sup>/g, '');
+
+                // Fix relative URLs so they don't resolve to 127.0.0.1 when served locally
+                html = html.replace(/href="\/(wiki|w)\//g, 'href="https://en.wikipedia.org/$1/');
+                html = html.replace(/src="\/\//g, 'src="https://');
+                html = html.replace(/href="\/\//g, 'href="https://');
+                html = html.replace(/href="#/g, `href="https://en.wikipedia.org/wiki/${encodeURIComponent(title.replace(/ /g, "_"))}#`);
+
+                // Make links open in a new tab
+                html = html.replace(/<a\s/gi, '<a target="_blank" rel="noopener noreferrer" ');
+                return html;
+            }
+            return '<p>Full article not available.</p>';
+        }
+
+        async function fetchWikidataFacts(title) {
+            try {
+                const wbUrl = `https://www.wikidata.org/w/api.php?action=wbgetentities&sites=enwiki&titles=${encodeURIComponent(title)}&props=claims|labels&format=json&origin=*`;
+                const response = await fetch(wbUrl);
+                const data = await response.json();
+
+                const entities = data.entities;
+                const entityId = Object.keys(entities)[0];
+                
+                if (entityId === '-1' || !entities[entityId].claims) {
+                    return [];
+                }
+
+                const claims = entities[entityId].claims;
+                const facts = [];
+                const qCodesToFetch = new Set();
+
+                const propertyMap = {
+                    'P31': 'Type', 'P17': 'Country', 'P19': 'Birth place', 'P20': 'Death place',
+                    'P106': 'Occupation', 'P569': 'Birth date', 'P570': 'Death date',
+                    'P571': 'Founded', 'P856': 'Website', 'P131': 'Located in',
+                    'P159': 'Headquarters', 'P112': 'Founded by',
+                    'P625': 'Coordinates', 'P1082': 'Population',
+                    'P36': 'Capital', 'P38': 'Currency', 'P1464': 'Category'
+                };
+
+                const tempFacts = [];
+
+                for (const [prop, label] of Object.entries(propertyMap)) {
+                    if (claims[prop] && claims[prop][0]) {
+                        const claim = claims[prop][0];
+                        let value = '';
+
+                        if (claim.mainsnak.datatype === 'wikibase-item' && claim.mainsnak.datavalue) {
+                            const itemId = claim.mainsnak.datavalue.value.id;
+                            value = itemId;
+                            qCodesToFetch.add(itemId);
+                        } else if (claim.mainsnak.datavalue) {
+                            value = claim.mainsnak.datavalue.value;
+                            if (typeof value === 'object') value = JSON.stringify(value);
+                        }
+
+                        if (value && typeof value === 'string') {
+                            tempFacts.push({ label, value, isQCode: qCodesToFetch.has(value) });
+                        }
+                    }
+                }
+
+                // Fetch labels for Q-codes
+                if (qCodesToFetch.size > 0) {
+                    const qCodesArray = Array.from(qCodesToFetch).join('|');
+                    const labelsUrl = `https://www.wikidata.org/w/api.php?action=wbgetentities&ids=${qCodesArray}&props=labels&languages=en&format=json&origin=*`;
+                    const labelsResponse = await fetch(labelsUrl);
+                    const labelsData = await labelsResponse.json();
+                    
+                    const qCodeLabels = {};
+                    for (const [qid, entity] of Object.entries(labelsData.entities || {})) {
+                        if (entity.labels && entity.labels.en) {
+                            qCodeLabels[qid] = entity.labels.en.value;
+                        }
+                    }
+
+                    for (const fact of tempFacts) {
+                        if (qCodeLabels[fact.value]) {
+                            fact.value = qCodeLabels[fact.value];
+                        }
+                        facts.push({ label: fact.label, value: fact.value });
+                    }
+                }
+
+                return facts;
+
+            } catch (error) {
+                console.error('Wikidata error:', error);
+                return [];
+            }
+        }
+
+        async function fetchRelatedTopics(title) {
+            const url = `https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(title)}&prop=pageimages|description&piprop=thumbnail&pithumbsize=200&format=json&origin=*`;
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (!data.query || !data.query.pages) return [];
+
+            return Object.values(data.query.pages)
+                .filter(p => p.title !== title && p.thumbnail)
+                .slice(0, 6)
+                .map(p => ({
+                    name: p.title,
+                    image: p.thumbnail.source
+                }));
+        }
+
+        // Render Functions
+        function renderDisambiguation(results, currentTitle) {
+            const container = document.getElementById('disambigList');
+            const section = document.getElementById('disambigSection');
+            
+            // Show other results
+            const otherResults = results.filter(r => r.title !== currentTitle).slice(0, 4);
+            
+            if (otherResults.length === 0) {
+                section.style.display = 'none';
+                return;
+            }
+
+            container.innerHTML = otherResults.map(result => `
+                <div class="disambig-item" onclick="performSearch('${result.title.replace(/'/g, "\\'")}')">
+                    <div class="disambig-info">
+                        <div class="disambig-title">${result.title}</div>
+                        <div class="disambig-desc">${result.snippet.replace(/<[^>]*>/g, '').substring(0, 100)}...</div>
+                    </div>
+                </div>
+            `).join('');
+            
+            section.style.display = 'block';
+        }
+
+        function renderFullArticle(html) {
+            document.getElementById('fullArticle').innerHTML = html;
+        }
+
+        function renderMap(facts) {
+            const container = document.getElementById('mapContainer');
+            const coordFact = facts.find(f => f.label === 'Coordinates');
+            
+            if (coordFact && coordFact.value) {
+                // Parse coordinates (they come in various formats)
+                const coords = coordFact.value;
+                // Extract lat/lon if in degree format
+                const latLonMatch = coords.match(/(\d+\.?\d*)°?\s*[NS][,\s]+(\d+\.?\d*)°?\s*[EW]/);
+                
+                if (latLonMatch) {
+                    const lat = latLonMatch[1];
+                    const lon = latLonMatch[2];
+                    container.innerHTML = `<iframe src="https://www.openstreetmap.org/export/embed.html?bbox=${lon-0.1},${lat-0.1},${parseFloat(lon)+0.1},${parseFloat(lat)+0.1}&layer=mapnik&marker=${lat},${lon}" frameborder="0"></iframe>`;
+                } else {
+                    // Try to get location name
+                    const locationFact = facts.find(f => f.label === 'Located in' || f.label === 'Country');
+                    if (locationFact) {
+                        container.innerHTML = `<iframe src="https://www.openstreetmap.org/export/embed.html?bbox=-180,-90,180,90&layer=mapnik&marker=0,0" frameborder="0"></iframe>`;
+                    }
+                }
+            }
+        }
+
+        function displayKnowledgeCard(data) {
+            const cardImage = document.getElementById('cardImage');
+            
+            if (data.image) {
+                cardImage.src = data.image;
+                cardImage.style.display = 'block';
+                cardImage.onerror = () => { cardImage.style.display = 'none'; };
+            } else {
+                cardImage.style.display = 'none';
+            }
+
+            document.getElementById('cardTitle').textContent = data.title;
+            document.getElementById('cardSubtitle').textContent = data.subtitle;
+            document.getElementById('cardDescription').textContent = data.description.substring(0, 250) + (data.description.length > 250 ? '...' : '');
+            document.getElementById('cardLink').href = data.wikipedia;
+
+            // Facts in card
+            const factsSection = document.getElementById('factsSection');
+            factsSection.innerHTML = '';
+            
+            if (data.facts && data.facts.length > 0) {
+                data.facts.forEach(fact => {
+                    const row = document.createElement('div');
+                    row.className = 'fact-row';
+                    row.innerHTML = `<span class="fact-label">${fact.label}</span><span class="fact-value">${fact.value}</span>`;
+                    factsSection.appendChild(row);
+                });
+                factsSection.style.display = 'block';
+            } else {
+                factsSection.style.display = 'none';
+            }
+
+            // Related
+            const relatedGrid = document.getElementById('relatedGrid');
+            relatedGrid.innerHTML = '';
+            
+            if (data.related && data.related.length > 0) {
+                data.related.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'related-item';
+                    div.onclick = () => performSearch(item.name);
+                    div.innerHTML = `
+                        <img class="related-image" src="${item.image}" alt="${item.name}" onerror="this.style.opacity='0.3'">
+                        <div class="related-name">${item.name}</div>
+                    `;
+                    relatedGrid.appendChild(div);
+                });
+                document.getElementById('relatedSection').style.display = 'block';
+            } else {
+                document.getElementById('relatedSection').style.display = 'none';
+            }
+        }
+
+        // Error handling
+        function showError(message) {
+            document.getElementById('loadingState').classList.remove('active');
+            document.getElementById('emptyState').style.display = 'flex';
+            document.getElementById('emptyState').innerHTML = `
+                <div class="error-message">${message}</div>
+            `;
+        }
+    </script>
+</body>
+</html>
