@@ -692,6 +692,16 @@
                             const itemId = claim.mainsnak.datavalue.value.id;
                             value = itemId;
                             qCodesToFetch.add(itemId);
+                        } else if (claim.mainsnak.datatype === 'time' && claim.mainsnak.datavalue && claim.mainsnak.datavalue.value) {
+                            const t = claim.mainsnak.datavalue.value.time;
+                            if (typeof t === 'string') {
+                                const m = t.match(/^([+-]?\d+)-(\d{2})-(\d{2})T/);
+                                if (m) {
+                                    value = `${m[1].replace(/^\+/, '')}-${m[2]}-${m[3]}`;
+                                } else {
+                                    value = t.replace(/^\+/, '');
+                                }
+                            }
                         } else if (claim.mainsnak.datavalue) {
                             value = claim.mainsnak.datavalue.value;
                             if (typeof value === 'object') value = JSON.stringify(value);
